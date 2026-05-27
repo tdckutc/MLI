@@ -1,0 +1,28 @@
+name: 三商專區代碼每日自動同步
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # 每天凌晨自動醒來執行
+  workflow_dispatch: # 支援後台一鍵手動強制更新
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 複製程式碼
+      uses: actions/checkout@v2
+    - name: 設定 Python 環境
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: 安裝必要套件
+      run: pip install requests beautifulsoup4
+    - name: 執行官方代碼連動
+      run: python crawler.py
+    - name: 自動推送到網頁前端
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add fund_data.json
+        git commit -m "同步最新三商保單代碼績效" || exit 0
+        git push
