@@ -21,8 +21,8 @@
         .currency-symbol { color: var(--primary-blue); font-weight: 700; font-size: 18px; margin-right: 8px; }
         .amount-input { border: none; background: transparent; font-size: 22px; font-weight: 700; color: var(--primary-blue); width: 100%; outline: none; }
         .fund-selector-wrapper { background: var(--light-bg); border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; }
-        .fund-selector-wrapper select { border: none; background: transparent; width: 100%; font-size: 15px; font-weight: 700; color: var(--primary-blue); outline: none; appearance: none; }
-        optgroup { font-weight: 700; color: #374151; background: #f9fafb; }
+        .fund-selector-wrapper select { border: none; background: transparent; width: 100%; font-size: 14px; font-weight: 700; color: var(--primary-blue); outline: none; appearance: none; }
+        optgroup { font-weight: 700; color: #374151; background: #f9fafb; font-size: 15px; }
         .result-card { background: var(--gold-light); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #f0e6d2; }
         .rate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .rate-title { font-size: 13px; color: #8a7330; font-weight: 500; }
@@ -63,28 +63,7 @@
             <div class="fund-selector-wrapper">
                 <span style="margin-right: 10px;">🔍</span>
                 <select id="fundSelect" onchange="autoFillRate()">
-                    <optgroup label="🔥 國內科技與成長 (累積型)">
-                        <option value="25.0|累積">DIA00060 (安聯台灣科技基金)</option>
-                        <option value="25.0|累積">UPA00020 (統一奔騰基金)</option>
-                        <option value="22.0|累積">NMA00030 (野村高科技基金)</option>
-                        <option value="18.0|累積">DIA00050 (安聯台灣大壩基金)</option>
-                    </optgroup>
-                    <optgroup label="🌎 海外強勢成長 (累積型)">
-                        <option value="20.0|累積">BR000030 (摩根美國科技基金-A股)</option>
-                        <option value="15.0|累積">AB000010 (聯博美國成長基金)</option>
-                        <option value="12.0|累積">FK000010 (富蘭克林高科技基金)</option>
-                    </optgroup>
-                    <optgroup label="💰 穩定現金流 (月配息型)">
-                        <option value="8.0|月配">DIT00110 (安聯收益成長-AM穩定月配)</option>
-                        <option value="7.5|月配">AB000070 (聯博全球多元收益-AT月配)</option>
-                        <option value="6.5|月配">FK000160 (富蘭克林全球債券-月配)</option>
-                        <option value="6.0|月配">NB000010 (路博邁高收益債-月配)</option>
-                    </optgroup>
-                    <optgroup label="🛡️ 專家代操 (類全委帳戶)">
-                        <option value="6.0|月配">MFD00010 (三商環球總報酬投資帳戶)</option>
-                        <option value="5.5|月配">MBR00010 (三商A+環球投資帳戶)</option>
-                        <option value="5.0|月配">MCD00010 (三商穩健成長投資帳戶)</option>
-                    </optgroup>
+                    <option value="25.0|累積">讀取全網資料庫中...</option>
                 </select>
             </div>
         </div>
@@ -124,6 +103,31 @@
 <script>
     let currentMode = 'regular';
 
+    // 啟動時動態去抓取 Python 爬出來的 JSON 檔案
+    window.onload = function() {
+        fetch('fund_data.json')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('fundSelect');
+                select.innerHTML = ''; 
+                for (const groupName in data) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = groupName;
+                    data[groupName].forEach(fund => {
+                        const option = document.createElement('option');
+                        option.value = `${fund.rate}|${fund.type}`;
+                        option.textContent = `${fund.code} (${fund.name})`;
+                        optgroup.appendChild(option);
+                    });
+                    select.appendChild(optgroup);
+                }
+                autoFillRate(); 
+            })
+            .catch(error => {
+                console.error("無法載入即時資料，啟用備用清單", error);
+            });
+    };
+
     function setMode(mode) {
         currentMode = mode;
         document.getElementById('mode-regular').classList.toggle('active', mode === 'regular');
@@ -146,15 +150,14 @@
             document.getElementById('regular-view').style.display = 'none';
             document.getElementById('single-view').style.display = 'block';
         }
-        // 完全解放限制，切換模式時不再強制換基金！
         calculate();
     }
 
     function autoFillRate() {
-        const selectData = document.getElementById('fundSelect').value.split('|');
-        const rate = parseFloat(selectData[0]);
-        document.getElementById('rateInput').value = rate;
-        // 完全解放限制，換基金時不再強制換模式！
+        const val = document.getElementById('fundSelect').value;
+        if(!val) return;
+        const selectData = val.split('|');
+        document.getElementById('rateInput').value = parseFloat(selectData[0]);
         calculate();
     }
 
@@ -171,7 +174,9 @@
     function calculate() {
         const amount = parseFloat(document.getElementById('investAmount').value) || 0;
         const rate = parseFloat(document.getElementById('rateInput').value) || 0;
-        const type = document.getElementById('fundSelect').value.split('|')[1];
+        const selectVal = document.getElementById('fundSelect').value;
+        if(!selectVal) return;
+        const type = selectVal.split('|')[1];
         
         if(currentMode === 'regular') {
             calculateRegular(amount, rate);
@@ -184,7 +189,6 @@
         const monthlyRate = (annualRate / 100) / 12;
         const years = [3, 5, 10, 15, 20];
         const futureValues = [];
-
         years.forEach(year => {
             const months = year * 12;
             let total = 0;
@@ -196,31 +200,21 @@
 
     function calculateSingle(principal, annualYield, type) {
         if(type === "累積") {
-            // 智慧變形：單筆 + 累積型 = 算複利總值
             document.getElementById('single-radar-title').innerText = "單筆長線複利雷達 (累積型)";
             document.getElementById('single-main-label').innerText = "10 年後預估本利和總值";
             document.getElementById('single-sub1-label').innerText = "3 年後預估總值";
             document.getElementById('single-sub2-label').innerText = "5 年後預估總值";
-            
             const r = annualYield / 100;
-            const val3 = principal * Math.pow(1 + r, 3);
-            const val5 = principal * Math.pow(1 + r, 5);
-            const val10 = principal * Math.pow(1 + r, 10);
-            
-            document.getElementById('monthlyPayoutDisplay').innerText = formatBig(val10);
-            document.getElementById('yearlyPayoutDisplay').innerText = formatBig(val3);
-            document.getElementById('fiveYearPayoutDisplay').innerText = formatBig(val5);
+            document.getElementById('monthlyPayoutDisplay').innerText = formatBig(principal * Math.pow(1 + r, 10));
+            document.getElementById('yearlyPayoutDisplay').innerText = formatBig(principal * Math.pow(1 + r, 3));
+            document.getElementById('fiveYearPayoutDisplay').innerText = formatBig(principal * Math.pow(1 + r, 5));
         } else {
-            // 智慧變形：單筆 + 月配/全委 = 算現金流
             document.getElementById('single-radar-title').innerText = "預估資產活水雷達 (配息/撥回)";
             document.getElementById('single-main-label').innerText = "每月穩定撥入現金流";
             document.getElementById('single-sub1-label').innerText = "1年累計領取";
             document.getElementById('single-sub2-label').innerText = "5年累計總領走";
-            
             const annualPayout = principal * (annualYield / 100);
-            const monthlyPayout = annualPayout / 12;
-            
-            document.getElementById('monthlyPayoutDisplay').innerText = formatExact(monthlyPayout);
+            document.getElementById('monthlyPayoutDisplay').innerText = formatExact(annualPayout / 12);
             document.getElementById('yearlyPayoutDisplay').innerText = formatExact(annualPayout);
             document.getElementById('fiveYearPayoutDisplay').innerText = formatExact(annualPayout * 5);
         }
@@ -231,22 +225,17 @@
         const labelsContainer = document.getElementById('chartLabels');
         chartContainer.innerHTML = ''; labelsContainer.innerHTML = '';
         const maxVal = Math.max(...values) || 1; 
-
         values.forEach((val, index) => {
             const heightPct = (val / maxVal) * 100;
-            const displayValue = formatChartNum(val);
             const barGroup = document.createElement('div');
             barGroup.className = 'chart-bar-group';
-            barGroup.innerHTML = `<div class="chart-value">${displayValue}</div><div class="chart-bar" style="height: ${Math.max(2, heightPct)}%;"></div>`;
+            barGroup.innerHTML = `<div class="chart-value">${formatChartNum(val)}</div><div class="chart-bar" style="height: ${Math.max(2, heightPct)}%;"></div>`;
             chartContainer.appendChild(barGroup);
             const labelDiv = document.createElement('div');
             labelDiv.className = 'chart-label'; labelDiv.style.width = '18%'; labelDiv.innerText = years[index] + '年';
             labelsContainer.appendChild(labelDiv);
         });
     }
-
-    calculate();
 </script>
-
 </body>
 </html>
