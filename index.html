@@ -12,22 +12,23 @@
         .top-nav { background-color: var(--card-bg); padding: 15px 20px 0 20px; border-bottom: 1px solid #e5e7eb; }
         .header-title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 20px; }
         .segment-control { display: flex; background: var(--light-bg); border-radius: 8px; padding: 4px; margin-bottom: 15px; }
-        .segment-btn { flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 500; color: var(--text-muted); border-radius: 6px; cursor: pointer; }
+        .segment-btn { flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 500; color: var(--text-muted); border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .segment-btn.active { background: var(--card-bg); color: var(--primary-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700; }
         .content { padding: 20px; }
         .input-card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .input-label { font-size: 14px; font-weight: 500; color: var(--text-main); margin-bottom: 10px; display: block; }
-        .amount-input-wrapper { background: var(--light-bg); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; margin-bottom: 15px; }
+        .amount-input-wrapper { background: var(--light-bg); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; margin-bottom: 15px; border: 1px solid transparent; }
         .currency-symbol { color: var(--primary-blue); font-weight: 700; font-size: 18px; margin-right: 8px; }
         .amount-input { border: none; background: transparent; font-size: 22px; font-weight: 700; color: var(--primary-blue); width: 100%; outline: none; }
         .fund-selector-wrapper { background: var(--light-bg); border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; }
-        .fund-selector-wrapper select { border: none; background: transparent; width: 100%; font-size: 16px; font-weight: 700; color: var(--primary-blue); outline: none; appearance: none; }
+        .fund-selector-wrapper select { border: none; background: transparent; width: 100%; font-size: 15px; font-weight: 700; color: var(--primary-blue); outline: none; appearance: none; }
+        optgroup { font-weight: 700; color: #374151; background: #f9fafb; }
         .result-card { background: var(--gold-light); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #f0e6d2; }
         .rate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .rate-title { font-size: 13px; color: #8a7330; font-weight: 500; }
         .rate-value-wrapper { display: flex; align-items: baseline; gap: 5px; }
         .rate-input { width: 80px; font-size: 26px; font-weight: 700; color: var(--text-main); border: none; background: transparent; outline: none; border-bottom: 2px solid #d4af37; padding-bottom: 2px; text-align: right; }
-        .chart-title { font-size: 14px; font-weight: 500; color: var(--text-main); margin-bottom: 20px; margin-top: 10px; }
+        .chart-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; margin-top: 10px; }
         .css-chart-container { display: flex; justify-content: space-between; align-items: flex-end; height: 180px; width: 100%; padding-top: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
         .chart-bar-group { display: flex; flex-direction: column; align-items: center; width: 18%; height: 100%; justify-content: flex-end; }
         .chart-value { font-size: 12px; font-weight: 700; color: #8a7330; margin-bottom: 5px; white-space: nowrap; }
@@ -35,10 +36,10 @@
         .chart-label { font-size: 12px; color: var(--text-muted); margin-top: 8px; text-align: center; font-weight: 500; }
         .payout-display { text-align: center; padding: 15px 0; background: #fff; border-radius: 12px; border: 1px solid #f0e6d2; margin-top: 10px; }
         .payout-amount { font-size: 38px; font-weight: 700; color: var(--primary-blue); margin: 5px 0; }
-        .payout-label { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .payout-label { font-size: 14px; color: var(--text-main); font-weight: 700; }
         .payout-sub { display: flex; justify-content: space-around; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e5e7eb; }
         .payout-sub-item { text-align: center; }
-        .payout-sub-item span { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .payout-sub-item span { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
         .payout-sub-item div { font-size: 15px; font-weight: 700; color: var(--text-main); }
     </style>
 </head>
@@ -48,7 +49,7 @@
         <div class="header-title">三商美邦 實戰動能提案系統</div>
         <div class="segment-control">
             <div class="segment-btn active" id="mode-regular" onclick="setMode('regular')">定期定額存本利</div>
-            <div class="segment-btn" id="mode-single" onclick="setMode('single')">單筆投入領月配</div>
+            <div class="segment-btn" id="mode-single" onclick="setMode('single')">單筆投入資金</div>
         </div>
     </div>
     <div class="content">
@@ -62,13 +63,28 @@
             <div class="fund-selector-wrapper">
                 <span style="margin-right: 10px;">🔍</span>
                 <select id="fundSelect" onchange="autoFillRate()">
-                    <option value="25.0|累積">DIA00060 (安聯台灣科技基金)</option>
-                    <option value="25.0|累積">UPA00020 (統一奔騰基金)</option>
-                    <option value="18.0|累積">DIA00050 (安聯台灣大壩基金)</option>
-                    <option value="8.0|月配">DIT00110 (安聯收益成長-AM穩定月配)</option>
-                    <option value="7.0|月配">AB000070 (聯博全球高收益債-AT月配)</option>
-                    <option value="6.0|類全委">MFD00010 (三商美邦環球總報酬投資帳戶)</option>
-                    <option value="5.5|類全委">MBR00010 (三商美邦A+環球投資帳戶)</option>
+                    <optgroup label="🔥 國內科技與成長 (累積型)">
+                        <option value="25.0|累積">DIA00060 (安聯台灣科技基金)</option>
+                        <option value="25.0|累積">UPA00020 (統一奔騰基金)</option>
+                        <option value="22.0|累積">NMA00030 (野村高科技基金)</option>
+                        <option value="18.0|累積">DIA00050 (安聯台灣大壩基金)</option>
+                    </optgroup>
+                    <optgroup label="🌎 海外強勢成長 (累積型)">
+                        <option value="20.0|累積">BR000030 (摩根美國科技基金-A股)</option>
+                        <option value="15.0|累積">AB000010 (聯博美國成長基金)</option>
+                        <option value="12.0|累積">FK000010 (富蘭克林高科技基金)</option>
+                    </optgroup>
+                    <optgroup label="💰 穩定現金流 (月配息型)">
+                        <option value="8.0|月配">DIT00110 (安聯收益成長-AM穩定月配)</option>
+                        <option value="7.5|月配">AB000070 (聯博全球多元收益-AT月配)</option>
+                        <option value="6.5|月配">FK000160 (富蘭克林全球債券-月配)</option>
+                        <option value="6.0|月配">NB000010 (路博邁高收益債-月配)</option>
+                    </optgroup>
+                    <optgroup label="🛡️ 專家代操 (類全委帳戶)">
+                        <option value="6.0|月配">MFD00010 (三商環球總報酬投資帳戶)</option>
+                        <option value="5.5|月配">MBR00010 (三商A+環球投資帳戶)</option>
+                        <option value="5.0|月配">MCD00010 (三商穩健成長投資帳戶)</option>
+                    </optgroup>
                 </select>
             </div>
         </div>
@@ -83,106 +99,154 @@
                 </div>
                 <div style="font-size: 32px;">🎯</div>
             </div>
+            
             <div id="regular-view">
                 <div class="chart-title">未來資產累積變化 (本利和)</div>
                 <div class="css-chart-container" id="cssChart"></div>
                 <div style="display: flex; justify-content: space-between; padding: 0 10px;" id="chartLabels"></div>
             </div>
+
             <div id="single-view" style="display: none;">
-                <div class="chart-title">預估資產活水雷達</div>
+                <div class="chart-title" id="single-radar-title">預估資產活水雷達</div>
                 <div class="payout-display">
-                    <div class="payout-label">每月穩定撥入現金流</div>
+                    <div class="payout-label" id="single-main-label">每月穩定撥入現金流</div>
                     <div class="payout-amount" id="monthlyPayoutDisplay">$0</div>
                     <div class="payout-sub">
-                        <div class="payout-sub-item"><span>1年累計領取</span><div id="yearlyPayoutDisplay">$0</div></div>
-                        <div class="payout-sub-item"><span>5年累計總領走</span><div id="fiveYearPayoutDisplay">$0</div></div>
+                        <div class="payout-sub-item"><span id="single-sub1-label">1年累計領取</span><div id="yearlyPayoutDisplay">$0</div></div>
+                        <div class="payout-sub-item"><span id="single-sub2-label">5年累計總領走</span><div id="fiveYearPayoutDisplay">$0</div></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
     let currentMode = 'regular';
+
     function setMode(mode) {
         currentMode = mode;
         document.getElementById('mode-regular').classList.toggle('active', mode === 'regular');
         document.getElementById('mode-single').classList.toggle('active', mode === 'single');
+        
         const amountTitle = document.getElementById('amount-title');
         const amountInput = document.getElementById('investAmount');
         const rateTitleLabel = document.getElementById('rateTitleLabel');
-        const fundSelect = document.getElementById('fundSelect');
+        
         if(mode === 'regular') {
             amountTitle.innerText = "每月預計投入本金";
             if(amountInput.value > 100000) amountInput.value = 30000;
-            rateTitleLabel.innerText = "預估年化報酬率 (根據市場數據)";
+            rateTitleLabel.innerText = "預估年化報酬率 (市場數據)";
             document.getElementById('regular-view').style.display = 'block';
             document.getElementById('single-view').style.display = 'none';
         } else {
             amountTitle.innerText = "單筆投入總本金 (新台幣)";
             if(amountInput.value < 100000) amountInput.value = 3000000;
-            rateTitleLabel.innerText = "精準年化配息率 / 撥回率";
+            rateTitleLabel.innerText = "精準年化回報 / 撥回率";
             document.getElementById('regular-view').style.display = 'none';
             document.getElementById('single-view').style.display = 'block';
-            const currentData = fundSelect.value.split('|');
-            if(currentData[1] === "累積") { fundSelect.value = "8.0|月配"; document.getElementById('rateInput').value = 8.0; }
         }
+        // 完全解放限制，切換模式時不再強制換基金！
         calculate();
     }
+
     function autoFillRate() {
         const selectData = document.getElementById('fundSelect').value.split('|');
         const rate = parseFloat(selectData[0]);
-        const type = selectData[1];
         document.getElementById('rateInput').value = rate;
-        if(type === "月配" || type === "類全委") { if(currentMode !== 'single') setMode('single'); }
-        else { if(currentMode !== 'regular') setMode('regular'); }
+        // 完全解放限制，換基金時不再強制換模式！
         calculate();
     }
-    function formatNumber(num) { if (num >= 10000) return Math.round(num / 10000) + '萬'; return Math.round(num).toLocaleString(); }
-    function formatCurrency(num) { return '$' + Math.round(num).toLocaleString(); }
+
+    function formatExact(num) { return '$' + Math.round(num).toLocaleString(); }
+    function formatBig(num) {
+        if (num >= 10000) return '$' + Math.round(num / 10000) + ' 萬';
+        return '$' + Math.round(num).toLocaleString();
+    }
+    function formatChartNum(num) {
+        if (num >= 10000) return Math.round(num / 10000) + '萬';
+        return Math.round(num).toLocaleString();
+    }
+
     function calculate() {
         const amount = parseFloat(document.getElementById('investAmount').value) || 0;
         const rate = parseFloat(document.getElementById('rateInput').value) || 0;
-        if(currentMode === 'regular') calculateRegular(amount, rate); else calculateSingle(amount, rate);
+        const type = document.getElementById('fundSelect').value.split('|')[1];
+        
+        if(currentMode === 'regular') {
+            calculateRegular(amount, rate);
+        } else {
+            calculateSingle(amount, rate, type);
+        }
     }
+
     function calculateRegular(monthlyAmount, annualRate) {
         const monthlyRate = (annualRate / 100) / 12;
         const years = [3, 5, 10, 15, 20];
         const futureValues = [];
+
         years.forEach(year => {
-            const months = year * 12; let total = 0;
+            const months = year * 12;
+            let total = 0;
             for(let i=0; i<months; i++) { total += monthlyAmount; total *= (1 + monthlyRate); }
             futureValues.push(total);
         });
         renderCssChart(years, futureValues);
     }
-    function calculateSingle(principal, annualYield) {
-        const annualPayout = principal * (annualYield / 100);
-        const monthlyPayout = annualPayout / 12;
-        const fiveYearPayout = annualPayout * 5;
-        document.getElementById('monthlyPayoutDisplay').innerText = formatCurrency(monthlyPayout);
-        document.getElementById('yearlyPayoutDisplay').innerText = formatCurrency(annualPayout);
-        document.getElementById('fiveYearPayoutDisplay').innerText = formatCurrency(fiveYearPayout);
+
+    function calculateSingle(principal, annualYield, type) {
+        if(type === "累積") {
+            // 智慧變形：單筆 + 累積型 = 算複利總值
+            document.getElementById('single-radar-title').innerText = "單筆長線複利雷達 (累積型)";
+            document.getElementById('single-main-label').innerText = "10 年後預估本利和總值";
+            document.getElementById('single-sub1-label').innerText = "3 年後預估總值";
+            document.getElementById('single-sub2-label').innerText = "5 年後預估總值";
+            
+            const r = annualYield / 100;
+            const val3 = principal * Math.pow(1 + r, 3);
+            const val5 = principal * Math.pow(1 + r, 5);
+            const val10 = principal * Math.pow(1 + r, 10);
+            
+            document.getElementById('monthlyPayoutDisplay').innerText = formatBig(val10);
+            document.getElementById('yearlyPayoutDisplay').innerText = formatBig(val3);
+            document.getElementById('fiveYearPayoutDisplay').innerText = formatBig(val5);
+        } else {
+            // 智慧變形：單筆 + 月配/全委 = 算現金流
+            document.getElementById('single-radar-title').innerText = "預估資產活水雷達 (配息/撥回)";
+            document.getElementById('single-main-label').innerText = "每月穩定撥入現金流";
+            document.getElementById('single-sub1-label').innerText = "1年累計領取";
+            document.getElementById('single-sub2-label').innerText = "5年累計總領走";
+            
+            const annualPayout = principal * (annualYield / 100);
+            const monthlyPayout = annualPayout / 12;
+            
+            document.getElementById('monthlyPayoutDisplay').innerText = formatExact(monthlyPayout);
+            document.getElementById('yearlyPayoutDisplay').innerText = formatExact(annualPayout);
+            document.getElementById('fiveYearPayoutDisplay').innerText = formatExact(annualPayout * 5);
+        }
     }
+
     function renderCssChart(years, values) {
         const chartContainer = document.getElementById('cssChart');
         const labelsContainer = document.getElementById('chartLabels');
         chartContainer.innerHTML = ''; labelsContainer.innerHTML = '';
-        const maxVal = Math.max(...values) || 1;
+        const maxVal = Math.max(...values) || 1; 
+
         values.forEach((val, index) => {
             const heightPct = (val / maxVal) * 100;
-            const displayValue = formatNumber(val);
-            const yearLabel = years[index] + '年';
+            const displayValue = formatChartNum(val);
             const barGroup = document.createElement('div');
             barGroup.className = 'chart-bar-group';
             barGroup.innerHTML = `<div class="chart-value">${displayValue}</div><div class="chart-bar" style="height: ${Math.max(2, heightPct)}%;"></div>`;
             chartContainer.appendChild(barGroup);
             const labelDiv = document.createElement('div');
-            labelDiv.className = 'chart-label'; labelDiv.style.width = '18%'; labelDiv.innerText = yearLabel;
+            labelDiv.className = 'chart-label'; labelDiv.style.width = '18%'; labelDiv.innerText = years[index] + '年';
             labelsContainer.appendChild(labelDiv);
         });
     }
+
     calculate();
 </script>
+
 </body>
 </html>
